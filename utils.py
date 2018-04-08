@@ -32,7 +32,7 @@ def create_inline_keyboard(orders, type=None):
         for i in range(len(orders)):
             if type == 'marginality':
                 callback_data = '{}.{}'.format(type, orders[i])
-            elif type == 'crypto' or type == 'currency':
+            elif type == 'location':
                 item_id = str(int(orders[i].split('.')[0]))
                 callback_data = '{}.{}'.format(type, item_id)
             btn = types.InlineKeyboardButton(text=orders[i], callback_data=callback_data)

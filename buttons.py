@@ -9,38 +9,14 @@ main_buttons = [
 ]
 
 main_buttons_without_img = [
-    '/Купить',
-    '/Продать',
-    '/Мои_объявления'
+    '/Нужно_передать_вещь_(через_кого_то)',
+    '/Еду_в_другой_город,_могу_передать_вещь',
+    '/Мои Заявки'
 ]
 
-crypto_sell_buttons = [
-    '1. Bitcoin (BTC)',
-    '2. Ethereum (ETH)',
-    '3. Bitcoin Cash (BCH)',
-    '4. Ripple (XRP)',
-    '5. Litecoin (LTC)',
-    '6. Cardano (ADA)',
-    '7. IOTA (MIOTA)',
-    '8. Dash (DASH)',
-    '9. NEM (XEM)',
-    '10. Monero (XMR)',
-    '11. Bitcoin Gold (BTG)',
-    '12. EOS (EOS)',
-    '13. Stellar (XLM)',
-    '14. Neo (NEO)',
-    '15. Qtum (QTUM)',
-    '16. Ethereum Classic (ETC)',
-    '17. Verge (XVG)',
-    '18. TRON (TRX)',
-    '19. Lisk (LSK)',
-    '20. Nxt (NXT)',
-    '21. Zcash (ZEC)',
-    '22. BitConnect (BCC)',
-    '23. OmiseGO (OMG)',
-    '24. Waves (WAVES)',
-    '25. Populous (PPT)',
-    '26. Другой (свой вариант)',
+from_to_locations_buttons = [
+    '1. Алматы-Астана',
+    '2. Астана-Алматы',
 ]
 
 currency_site_buttons = [

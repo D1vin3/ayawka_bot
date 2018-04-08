@@ -25,14 +25,16 @@ def get_current_state(user_id):
 
 class SessionDb:
 
-    def create_session_with_crypto(self, user_id, crypto):
+    def create_session_with_location(self, user_id, location):
         value = {
-            'crypto': crypto,
-            'price': '',
-            'cur_site': '',
-            'city': '',
-            'marginality': ''
+            'location': location,
+            'first_date': '',
+            'last_date': '',
+            'type': '',
+            'weight': '',
+            'price': ''
         }
+
         value = json.dumps(value)
         with Vedis(config.session_file) as db:
             try:
@@ -53,22 +55,25 @@ class SessionDb:
                 return 'no session for this user'
 
 
-    def update_session(self, user_id, crypto=None, price=None, cur_site=None, city=None, marginality=None):
+    def update_session(self, user_id, location=None, first_date=None, last_date=None, type=None,
+                       weight=None, price=None):
         with Vedis(config.session_file) as db:
             try:
                 print('{} with {}'.format(user_id, db[user_id]))
                 value = db[user_id]
                 value = json.loads(value)
-                if crypto is not None:
-                    value['crypto'] = crypto
+                if location is not None:
+                    value['location'] = location
+                elif first_date is not None:
+                    value['first_date'] = first_date
+                elif last_date is not None:
+                    value['last_date'] = last_date
+                elif type is not None:
+                    value['type'] = type
+                elif weight is not None:
+                    value['weight'] = weight
                 elif price is not None:
                     value['price'] = price
-                elif cur_site is not None:
-                    value['cur_site'] = cur_site
-                elif city is not None:
-                    value['city'] = city
-                elif marginality is not None:
-                    value['marginality'] = marginality
                 value = json.dumps(value)
                 db[user_id] = value
                 return db[user_id]
@@ -85,17 +90,19 @@ class DBHelper:
     def setup(self):
         stmt = "CREATE TABLE IF NOT EXISTS orders (id integer primary key, " \
                    "user text, " \
-                   "crypto text, " \
-                   "price text, " \
-                   "cur_site text," \
-                   "city text," \
-                   "marginality text)"
+                   "location text, " \
+                   "first_date text, " \
+                   "last_date text," \
+                   "type text," \
+                   "weight text," \
+                   "price text)"
         self.conn.execute(stmt)
         self.conn.commit()
 
-    def add_order(self, user, crypto, price, cur_site, city, marginality):
-        stmt = "INSERT INTO orders (user, crypto, price, cur_site, city, marginality) VALUES (?, ?, ?, ?, ?, ?)"
-        args = (user, crypto, price, cur_site, city, marginality)
+    def add_order(self, user, location, first_date, last_date, type, weight, price):
+        stmt = "INSERT INTO orders (user, location, first_date, last_date, type, weight, proce) VALUES " \
+               "(?, ?, ?, ?, ?, ?, ?)"
+        args = (user, location, first_date, last_date, type, weight, price)
         self.conn.execute(stmt, args)
         self.conn.commit()
 

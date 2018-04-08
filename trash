@@ -41,7 +41,7 @@ def send_crypto(message):
     print('Клиент')
     bot.send_message(
         message.chat.id, "Пожалуйста, укажите интересующий вас маршрут",
-        reply_markup=create_inline_keyboard(from_to_locations_buttons, type='location')
+        reply_markup=create_inline_keyboard(from_to_locations_buttons, type='first_date')
     )
     dbhelper.get_current_state(message.chat.id)
 
@@ -111,6 +111,30 @@ def cmd_reset(message):
 #     dbhelper.set_state(chat_id, config.States.S_CHOOSE_CURRENCY_SITE.value)
 
 
+# 2 - ENTER OWN CRYPTO
+@bot.message_handler(
+    func=lambda message: dbhelper.get_current_state(message.chat.id) == config.States.S_TYPE_OWN_CRYPTO.value)
+def user_own_currency(message):
+    print('S_TYPE_OWN_CURRENCY_SITE is called')
+    chat_id = message.chat.id
+    location = message.text
+    print(location)
+    # now = datetime.datetime.now()               #Current date
+    # chat_id = message.chat.id
+    # date = (now.year,now.month)
+    # current_shown_dates[chat_id] = date         #Saving the current date in a dict
+    # markup = create_calendar(now.year,now.month)
+    # bot.send_message(message.chat.id, "Please, choose a date", reply_markup=markup)
+
+    bot.send_message(
+        chat_id, 'На какую сумму продаете($)?',
+        reply_markup=create_keyboard(['/Сбросить', '/Главная'], 1)
+    )
+    session.create_session_with_location(chat_id, location=location)
+    dbhelper.set_state(chat_id, config.States.S_CHOOSE_CURRENCY_SITE.value)
+    print('--------------------------------------------------------------------')
+
+
 # 4 - CHHOSE CURRENCY
 @bot.message_handler(
     func=lambda message: dbhelper.get_current_state(message.chat.id) == config.States.S_CHOOSE_CURRENCY_SITE.value)
@@ -121,7 +145,7 @@ def user_entering_currency(message):
     print(price)
     bot.send_message(
         message.chat.id, "По какому курсу продаете?",
-        reply_markup=create_inline_keyboard(currency_site_buttons, type='last_date')
+        reply_markup=create_inline_keyboard(currency_site_buttons, type='currency')
     )
     session.update_session(chat_id, price=price)
     print('--------------------------------------------------------------------')
@@ -180,43 +204,44 @@ def user_entering_city(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def test_callback(call):
+    print('CALLBACK IS CALLED')
     chat_id = call.message.chat.id
     data = call.data.split('.')
     type = data[0]
-    id = int(''.join(filter(lambda x: x.isdigit(), data[-1])))
-    print('CALLBACK IS CALLED')
-    print(id)
     print('------{}'.format(data))
+    id = int(''.join(filter(lambda x: x.isdigit(), data[-1])))
+    print(id)
     now = datetime.datetime.now()               #Current date
 
-    if type == 'location':
-        print('location is PRESSED')
+    if type == 'first_date':
+        print('first_date is PRESSED')
         date = (now.year, now.month)
-        # current_shown_dates[chat_id] = date  # Saving the current date in a dict
-        markup = create_calendar(now.year, now.month, isFirst=True)
+        current_shown_dates[chat_id] = date  # Saving the current date in a dict
+        markup = create_calendar(now.year, now.month)
         bot.send_message(chat_id, "Выберите начальную дату...", reply_markup=markup)
         location = ''.join(from_to_locations_buttons[id - 1].split('.')[-1].strip())
         print(location)
         session.create_session_with_location(chat_id, location=location)
 
-        # dbhelper.set_state(chat_id, config.States.S_CHOOSE_CURRENCY_SITE.value)
+        dbhelper.set_state(chat_id, config.States.S_CHOOSE_CURRENCY_SITE.value)
 
-    elif type == 'first_date':
-        print('first_date is PRESSED')
-        date = (now.year, now.month)
-        first_date = data[-1].strip()
-        # current_shown_dates[chat_id] = date  # Saving the current date in a dict
-        markup = create_calendar(now.year, now.month)
-        bot.send_message(chat_id, "Выберите конечную дату...", reply_markup=markup)
-        session.update_session(chat_id, first_date=first_date)
-
-    elif type == 'last_date':
-        print('last_date is PRESSED')
-        date = (now.year, now.month)
-        last_date = data[-1].strip()
-
-        bot.send_message(chat_id, "Выберите конечную дату...", reply_markup=markup)
-        session.update_session(chat_id, last_date=last_date)
+    #     if id != 26:
+    #         bot.send_message(
+    #             chat_id, 'На какую сумму продаете($)?',
+    #             reply_markup=create_keyboard(['/Сбросить', '/Главная'], 1)
+    #         )
+    #         # Create session object
+    #         crypto = ''.join(filter(lambda x: x.isalpha() or x in ['(', ')'], from_to_locations_buttons[id]))
+    #         session.create_session_with_crypto(chat_id, crypto)
+    #         dbhelper.set_state(chat_id, config.States.S_CHOOSE_CURRENCY_SITE.value)
+    #     else:
+    #         print('other')
+    #
+    #         bot.send_message(
+    #             chat_id, 'Пожалуйста, введите собственный вариант названия криптовалюты...',
+    #             reply_markup=create_keyboard(['/Сбросить', '/Главная'], 1)
+    #         )
+    #         dbhelper.set_state(chat_id, config.States.S_TYPE_OWN_CRYPTO.value)
 
     print('--------------------------------------------------------------------')
 
@@ -266,46 +291,6 @@ def test_callback(call):
     #         reply_markup=create_keyboard(main_buttons_without_img, 1)
     #     )
     #     print('--------------------------------------------------------------------')
-
-
-# @bot.callback_query_handler(func=lambda call: call.data == 'next-month')
-# def next_month(call):
-#     chat_id = call.message.chat.id
-#     saved_date = current_shown_dates.get(chat_id)
-#     if saved_date is not None:
-#         year, month = saved_date
-#         month += 1
-#         if month > 12:
-#             month = 1
-#             year += 1
-#         date = (year,month)
-#         current_shown_dates[chat_id] = date
-#         markup = create_calendar(year, month)
-#         bot.edit_message_text("Please, choose a date", call.from_user.id, call.message.message_id, reply_markup=markup)
-#         bot.answer_callback_query(call.id, text="")
-#     else:
-#         #Do something to inform of the error
-#         pass
-#
-#
-# @bot.callback_query_handler(func=lambda call: call.data == 'previous-month')
-# def previous_month(call):
-#     chat_id = call.message.chat.id
-#     saved_date = current_shown_dates.get(chat_id)
-#     if saved_date is not None:
-#         year, month = saved_date
-#         month -= 1
-#         if month < 1:
-#             month = 12
-#             year -= 1
-#         date = (year, month)
-#         current_shown_dates[chat_id] = date
-#         markup = create_calendar(year, month)
-#         bot.edit_message_text("Please, choose a date", call.from_user.id, call.message.message_id, reply_markup=markup)
-#         bot.answer_callback_query(call.id, text="")
-#     else:
-#         #Do something to inform of the error
-#         pass
 
 
 # По команде /Сбросить будем сбрасывать состояния, возвращаясь к началу диалога
