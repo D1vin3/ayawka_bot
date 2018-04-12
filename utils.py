@@ -35,6 +35,9 @@ def create_inline_keyboard(orders, type=None):
             elif type == 'location':
                 item_id = str(int(orders[i].split('.')[0]))
                 callback_data = '{}.{}'.format(type, item_id)
+            elif type == 'type':
+                item_id = str(int(orders[i].split('.')[0]))
+                callback_data = '{}.{}'.format(type, item_id)
             btn = types.InlineKeyboardButton(text=orders[i], callback_data=callback_data)
             keyboard.add(btn)
         return keyboard

@@ -16,7 +16,7 @@ class States(Enum):
     поэтому и тут будем использовать тоже строки (str)
     """
     S_START = "0"                   # Начало нового диалога
-    S_CHOOSE_CRYPTO = "1"           # location
+    S_CHOOSE_LOCATION = "1"         # location
     S_TYPE_OWN_CRYPTO = "2"         # location
     S_ENTER_SUM = "3"               # first_date
     S_CHOOSE_CURRENCY_SITE = "4"    # last_date

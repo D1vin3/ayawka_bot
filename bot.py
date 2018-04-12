@@ -11,7 +11,7 @@ from telebot import TeleBot, types
 from config import token
 from dbhelper import DBHelper, SessionDb
 from buttons import from_to_locations_buttons, main_buttons_without_img, \
-    currency_site_buttons, marginality_amount_buttons
+    currency_site_buttons, marginality_amount_buttons, travel_types_buttons, reset_buttons
 from utils import create_inline_keyboard, create_keyboard, formatItems
 from telegramcalendar import create_calendar
 
@@ -28,17 +28,21 @@ db.setup()
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.send_message(message.chat.id, "Здравствуйте, я бот Аяшки из СДУ. Охуенный бот охуенного пацана крч")
+    bot.send_message(message.chat.id, "Здравствуйте, я бот Аяшки из СДУ.")
     bot.send_message(
         message.chat.id, "Выберите интересующую вас услугу...",
         reply_markup=create_keyboard(main_buttons_without_img, 1)
     )
-    dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_CRYPTO.value)
+    # dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_LOCATION.value)
 
 
 @bot.message_handler(commands=['Нужно_передать_вещь_(через_кого_то)'])
 def send_crypto(message):
     print('Клиент')
+    bot.send_message(
+        message.chat.id, "Загрузка...",
+        reply_markup=create_keyboard(['/Главная'], 1)
+    )
     bot.send_message(
         message.chat.id, "Пожалуйста, укажите интересующий вас маршрут",
         reply_markup=create_inline_keyboard(from_to_locations_buttons, type='location')
@@ -48,11 +52,17 @@ def send_crypto(message):
 
 @bot.message_handler(commands=["Главная"])
 def cmd_reset(message):
+    print('Главнавя')
     bot.send_message(
-        message.chat.id, "Выберите интересующую вас услугу...",
+        message.chat.id, "Ваши действия были отменены. Пожалуйста, "
+                         "выберите интересующую вас услугу...",
         reply_markup=create_keyboard(main_buttons_without_img, 1)
     )
-    dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_CRYPTO.value)
+    # bot.send_message(
+    #     message.chat.id, "Выберите интересующую вас услугу...",
+    #     reply_markup=create_keyboard(main_buttons_without_img, 1)
+    # )
+    dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_LOCATION.value)
 
 
 ### Uncomment this
@@ -182,41 +192,75 @@ def user_entering_city(message):
 def test_callback(call):
     chat_id = call.message.chat.id
     data = call.data.split('.')
+    print('------{}'.format(data))
     type = data[0]
     id = int(''.join(filter(lambda x: x.isdigit(), data[-1])))
     print('CALLBACK IS CALLED')
     print(id)
-    print('------{}'.format(data))
     now = datetime.datetime.now()               #Current date
 
     if type == 'location':
-        print('location is PRESSED')
+        # print('location is PRESSED')
         date = (now.year, now.month)
         # current_shown_dates[chat_id] = date  # Saving the current date in a dict
         markup = create_calendar(now.year, now.month, isFirst=True)
+
         bot.send_message(chat_id, "Выберите начальную дату...", reply_markup=markup)
         location = ''.join(from_to_locations_buttons[id - 1].split('.')[-1].strip())
-        print(location)
+        print('locaiton is {}'.format(location))
         session.create_session_with_location(chat_id, location=location)
 
         # dbhelper.set_state(chat_id, config.States.S_CHOOSE_CURRENCY_SITE.value)
 
     elif type == 'first_date':
-        print('first_date is PRESSED')
+        # print('first_date is PRESSED')
         date = (now.year, now.month)
         first_date = data[-1].strip()
+        print('first_date is {}'.format(first_date))
         # current_shown_dates[chat_id] = date  # Saving the current date in a dict
         markup = create_calendar(now.year, now.month)
         bot.send_message(chat_id, "Выберите конечную дату...", reply_markup=markup)
         session.update_session(chat_id, first_date=first_date)
 
     elif type == 'last_date':
-        print('last_date is PRESSED')
+        # print('last_date is PRESSED')
         date = (now.year, now.month)
         last_date = data[-1].strip()
+        print('last_date is {}'.format(last_date))
 
-        bot.send_message(chat_id, "Выберите конечную дату...", reply_markup=markup)
+        bot.send_message(
+            chat_id, "Выберите тип поездки...",
+            reply_markup=create_inline_keyboard(travel_types_buttons, type='type')
+        )
         session.update_session(chat_id, last_date=last_date)
+
+    elif type == 'type':
+        # print('type is pressed')
+        travel_type = ''.join(travel_types_buttons[id - 1].split('.')[-1].strip())
+        print('type is {}'.format(travel_type))
+        session.update_session(chat_id, type=travel_type)
+        order = session.get_session(chat_id)
+        print(order)
+        location, first_date, last_date, type = order['location'], order['first_date'], \
+                                                order['last_date'], order['type']
+
+        db.add_order(chat_id, location, first_date, last_date, type)
+        bot.send_message(
+            chat_id, "Запись успешна добавлена",
+            reply_markup=create_keyboard(main_buttons_without_img, 1)
+        )
+        # bot.send_message(
+        #     chat_id, "Выберите тип поездки...",
+        #     reply_markup=create_inline_keyboard(travel_types_buttons, type='type')
+        # )
+
+        #     order = session.get_session(chat_id)
+        #     print(order)
+        #     crypto, price, cur_site, city, marginality = order['crypto'], order['price'], \
+        #                                                  order['cur_site'], order['city'], order['marginality']
+        #
+        #     db.add_order(chat_id, crypto, price, cur_site, city, marginality)
+        #     dbhelper.set_state(call.message.chat.id, config.States.S_START.value)
 
     print('--------------------------------------------------------------------')
 
@@ -308,14 +352,14 @@ def test_callback(call):
 #         pass
 
 
-# По команде /Сбросить будем сбрасывать состояния, возвращаясь к началу диалога
-@bot.message_handler(commands=["Сбросить"])
-def cmd_reset(message):
-    bot.send_message(
-        message.chat.id, "Все ваши действия были отменены. Пожалуйста, выберите из списка одну из услуг...",
-        reply_markup=create_inline_keyboard(from_to_locations_buttons, type='crypto')
-    )
-    dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_CRYPTO.value)
+# # По команде /Сбросить будем сбрасывать состояния, возвращаясь к началу диалога
+# @bot.message_handler(commands=["Сбросить"])
+# def cmd_reset(message):
+#     bot.send_message(
+#         message.chat.id, "Все ваши действия были отменены. Пожалуйста, выберите из списка одну из услуг...",
+#         reply_markup=create_inline_keyboard(from_to_locations_buttons, type='crypto')
+#     )
+    # dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_LOCATION.value)
 
 
 print('Bot has been switched on')

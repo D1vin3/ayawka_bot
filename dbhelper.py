@@ -31,8 +31,6 @@ class SessionDb:
             'first_date': '',
             'last_date': '',
             'type': '',
-            'weight': '',
-            'price': ''
         }
 
         value = json.dumps(value)
@@ -48,15 +46,14 @@ class SessionDb:
     def get_session(self, user_id):
         with Vedis(config.session_file) as db:
             try:
-                print('{} with {}'.format(user_id, db[user_id]))
+                # print('{} with {}'.format(user_id, db[user_id]))
                 value = json.loads(db[user_id])
                 return value
             except KeyError:
                 return 'no session for this user'
 
 
-    def update_session(self, user_id, location=None, first_date=None, last_date=None, type=None,
-                       weight=None, price=None):
+    def update_session(self, user_id, location=None, first_date=None, last_date=None, type=None):
         with Vedis(config.session_file) as db:
             try:
                 print('{} with {}'.format(user_id, db[user_id]))
@@ -70,10 +67,10 @@ class SessionDb:
                     value['last_date'] = last_date
                 elif type is not None:
                     value['type'] = type
-                elif weight is not None:
-                    value['weight'] = weight
-                elif price is not None:
-                    value['price'] = price
+                # elif weight is not None:
+                #     value['weight'] = weight
+                # elif price is not None:
+                #     value['price'] = price
                 value = json.dumps(value)
                 db[user_id] = value
                 return db[user_id]
@@ -93,16 +90,16 @@ class DBHelper:
                    "location text, " \
                    "first_date text, " \
                    "last_date text," \
-                   "type text," \
-                   "weight text," \
-                   "price text)"
+                   "type text)"
+                   # "weight text," \
+                   # "price text)"
         self.conn.execute(stmt)
         self.conn.commit()
 
-    def add_order(self, user, location, first_date, last_date, type, weight, price):
-        stmt = "INSERT INTO orders (user, location, first_date, last_date, type, weight, proce) VALUES " \
-               "(?, ?, ?, ?, ?, ?, ?)"
-        args = (user, location, first_date, last_date, type, weight, price)
+    def add_order(self, user, location, first_date, last_date, type):
+        stmt = "INSERT INTO orders (user, location, first_date, last_date, type) VALUES " \
+               "(?, ?, ?, ?, ?)"
+        args = (user, location, first_date, last_date, type)
         self.conn.execute(stmt, args)
         self.conn.commit()
 

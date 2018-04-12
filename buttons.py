@@ -8,6 +8,10 @@ main_buttons = [
     '{} Мои_объявления'.format(emoji.emojize(':package:', use_aliases=True))
 ]
 
+reset_buttons = [
+    'Главная'
+]
+
 main_buttons_without_img = [
     '/Нужно_передать_вещь_(через_кого_то)',
     '/Еду_в_другой_город,_могу_передать_вещь',
@@ -17,6 +21,11 @@ main_buttons_without_img = [
 from_to_locations_buttons = [
     '1. Алматы-Астана',
     '2. Астана-Алматы',
+]
+
+travel_types_buttons = [
+    '1. Самолёт',
+    '2. Поезд'
 ]
 
 currency_site_buttons = [
