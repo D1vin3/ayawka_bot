@@ -30,11 +30,15 @@ def create_inline_keyboard(orders, type=None):
         if type == 'deleteOrder':
             return create_inline_button_for_delete(orders)
         for i in range(len(orders)):
-            if type == 'marginality':
-                callback_data = '{}.{}'.format(type, orders[i])
-            elif type == 'location':
+            if type == 'source':
                 item_id = str(int(orders[i].split('.')[0]))
                 callback_data = '{}.{}'.format(type, item_id)
+            elif type == 'destination':
+                item_id = str(int(orders[i].split('.')[0]))
+                callback_data = '{}.{}'.format(type, item_id)
+            # elif type == 'location':
+            #     item_id = str(int(orders[i].split('.')[0]))
+            #     callback_data = '{}.{}'.format(type, item_id)
             elif type == 'type':
                 item_id = str(int(orders[i].split('.')[0]))
                 callback_data = '{}.{}'.format(type, item_id)
@@ -46,7 +50,7 @@ def create_inline_keyboard(orders, type=None):
 def create_inline_button_for_delete(order):
     keyboard = types.InlineKeyboardMarkup()
     callback_data = 'deleteOrder.{}'.format(order[0])
-    btn = types.InlineKeyboardButton(text='Удалить объявление', callback_data=callback_data)
+    btn = types.InlineKeyboardButton(text='Удалить заявку', callback_data=callback_data)
     keyboard.add(btn)
     return keyboard
 

@@ -10,8 +10,8 @@ import datetime
 from telebot import TeleBot, types
 from config import token
 from dbhelper import DBHelper, SessionDb
-from buttons import from_to_locations_buttons, main_buttons_without_img, \
-    currency_site_buttons, marginality_amount_buttons, travel_types_buttons, reset_buttons
+from buttons import source_buttons, main_buttons_without_img, \
+    currency_site_buttons, marginality_amount_buttons, travel_types_buttons, reset_buttons, destination_buttons
 from utils import create_inline_keyboard, create_keyboard, formatItems
 from telegramcalendar import create_calendar
 
@@ -45,7 +45,7 @@ def send_crypto(message):
     )
     bot.send_message(
         message.chat.id, "Пожалуйста, укажите интересующий вас маршрут",
-        reply_markup=create_inline_keyboard(from_to_locations_buttons, type='location')
+        reply_markup=create_inline_keyboard(source_buttons, type='source')
     )
     dbhelper.get_current_state(message.chat.id)
 
@@ -65,20 +65,19 @@ def cmd_reset(message):
     dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_LOCATION.value)
 
 
-### Uncomment this
-# @bot.message_handler(commands=["Мои_объявления"])
-# def get_own_orders(message):
-#     print('МОИ ОБЪЯВЛЕНИЯ')
-#     chat_id = message.chat.id
-#     orders = db.get_own_orders(message.chat.id)
-#     if len(orders) is not 0:
-#         for order in orders:
-#             text = "Вы продаете: {} \nСумма: {} \nЦена по курсу: {} \nГород: {} \nКомиссия в процентах: {}\n\n". \
-#                 format(order[2], order[3], order[4], order[5], order[6])
-#             bot.send_message(chat_id, text, reply_markup=create_inline_keyboard(order, 'deleteOrder'))
-#     else:
-#         text = "Список ваших объявлений пуст. Добавьте первое, нажав на /Продать"
-#         bot.send_message(chat_id, text)
+@bot.message_handler(commands=["Мои_заявки"])
+def get_own_orders(message):
+    print('МОИ ЗАЯВКИ')
+    chat_id = message.chat.id
+    orders = db.get_own_orders(chat_id)
+    if len(orders) is not 0:
+        for order in orders:
+            text = "Откуда: {} \nКуда: {} \nНачальная дата: {} \nКонечная дата: {} \nТип перевозки: {}\n\n". \
+                format(order[2], order[3], order[4], order[5], order[6])
+            bot.send_message(chat_id, text, reply_markup=create_inline_keyboard(order, 'deleteOrder'))
+    else:
+        text = "Список ваших заявок пуст. Добавьте первое, нажав на /Нужно_передать_вещь_(через_кого_то)"
+        bot.send_message(chat_id, text)
 
 ### - Uncomment this
 # @bot.message_handler(commands=["Еду_в_другой_город,_могу_передать_вещь"])
@@ -199,21 +198,28 @@ def test_callback(call):
     print(id)
     now = datetime.datetime.now()               #Current date
 
-    if type == 'location':
-        # print('location is PRESSED')
+    if type == 'source':
+        source = ''.join(source_buttons[id - 1].split('.')[-1].strip())
+        print('source is {}'.format(source))
+        bot.send_message(
+            chat_id, "Пожалуйста, укажите пункт назначения...",
+            reply_markup=create_inline_keyboard(destination_buttons, type='destination')
+        )
+        session.create_session_with_source(chat_id, source=source)
+
+    elif type == 'destination':
         date = (now.year, now.month)
         # current_shown_dates[chat_id] = date  # Saving the current date in a dict
         markup = create_calendar(now.year, now.month, isFirst=True)
 
         bot.send_message(chat_id, "Выберите начальную дату...", reply_markup=markup)
-        location = ''.join(from_to_locations_buttons[id - 1].split('.')[-1].strip())
-        print('locaiton is {}'.format(location))
-        session.create_session_with_location(chat_id, location=location)
+        destination = ''.join(destination_buttons[id - 1].split('.')[-1].strip())
+        print('destination is {}'.format(destination))
+        session.update_session(chat_id, destination=destination)
 
         # dbhelper.set_state(chat_id, config.States.S_CHOOSE_CURRENCY_SITE.value)
 
     elif type == 'first_date':
-        # print('first_date is PRESSED')
         date = (now.year, now.month)
         first_date = data[-1].strip()
         print('first_date is {}'.format(first_date))
@@ -241,14 +247,27 @@ def test_callback(call):
         session.update_session(chat_id, type=travel_type)
         order = session.get_session(chat_id)
         print(order)
-        location, first_date, last_date, type = order['location'], order['first_date'], \
-                                                order['last_date'], order['type']
+        source, destination, first_date, last_date, type = \
+            order['source'], order['destination'], order['first_date'], \
+            order['last_date'], order['type']
 
-        db.add_order(chat_id, location, first_date, last_date, type)
+        db.add_order(chat_id, source, destination, first_date, last_date, type)
         bot.send_message(
             chat_id, "Запись успешна добавлена",
             reply_markup=create_keyboard(main_buttons_without_img, 1)
         )
+
+    elif type == 'deleteOrder':
+        print('id is {}'.format(id))
+        db.delete_order(id)
+        orders = db.get_own_orders(chat_id)
+        print('deleted')
+        # print(orders)
+        bot.send_message(
+            chat_id, 'Объявление успешно удалено',
+            reply_markup=create_keyboard(main_buttons_without_img, 1)
+        )
+
         # bot.send_message(
         #     chat_id, "Выберите тип поездки...",
         #     reply_markup=create_inline_keyboard(travel_types_buttons, type='type')

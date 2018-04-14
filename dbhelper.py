@@ -25,9 +25,10 @@ def get_current_state(user_id):
 
 class SessionDb:
 
-    def create_session_with_location(self, user_id, location):
+    def create_session_with_source(self, user_id, source):
         value = {
-            'location': location,
+            'source': source,
+            'destination': '',
             'first_date': '',
             'last_date': '',
             'type': '',
@@ -53,14 +54,16 @@ class SessionDb:
                 return 'no session for this user'
 
 
-    def update_session(self, user_id, location=None, first_date=None, last_date=None, type=None):
+    def update_session(self, user_id, source=None, destination=None, first_date=None, last_date=None, type=None):
         with Vedis(config.session_file) as db:
             try:
                 print('{} with {}'.format(user_id, db[user_id]))
                 value = db[user_id]
                 value = json.loads(value)
-                if location is not None:
-                    value['location'] = location
+                if source is not None:
+                    value['source'] = source
+                elif destination is not None:
+                    value['destination'] = destination
                 elif first_date is not None:
                     value['first_date'] = first_date
                 elif last_date is not None:
@@ -87,7 +90,8 @@ class DBHelper:
     def setup(self):
         stmt = "CREATE TABLE IF NOT EXISTS orders (id integer primary key, " \
                    "user text, " \
-                   "location text, " \
+                   "source text, " \
+                   "destination text, " \
                    "first_date text, " \
                    "last_date text," \
                    "type text)"
@@ -96,10 +100,10 @@ class DBHelper:
         self.conn.execute(stmt)
         self.conn.commit()
 
-    def add_order(self, user, location, first_date, last_date, type):
-        stmt = "INSERT INTO orders (user, location, first_date, last_date, type) VALUES " \
-               "(?, ?, ?, ?, ?)"
-        args = (user, location, first_date, last_date, type)
+    def add_order(self, user, source, destination, first_date, last_date, type):
+        stmt = "INSERT INTO orders (user, source, destination, first_date, last_date, type) VALUES " \
+               "(?, ?, ?, ?, ?, ?)"
+        args = (user, source, destination, first_date, last_date, type)
         self.conn.execute(stmt, args)
         self.conn.commit()
 
