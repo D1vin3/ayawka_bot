@@ -31,8 +31,38 @@ def create_calendar(year, month, isFirst=False):
         markup.row(*row)
     # Last row - Buttons
     row = list()
-    row.append(types.InlineKeyboardButton("<", callback_data="previous-month"))
-    row.append(types.InlineKeyboardButton(" ", callback_data="ignore"))
-    row.append(types.InlineKeyboardButton(">", callback_data="next-month"))
+    row.append(types.InlineKeyboardButton("<", callback_data="{}.previous-month.999".format(type)))
+    row.append(types.InlineKeyboardButton(" ", callback_data="ignore.999"))
+    row.append(types.InlineKeyboardButton(">", callback_data="{}.next-month.999".format(type)))
     markup.row(*row)
     return markup
+
+
+def next_month_markup(current_shown_dates, call, isFirst=False):
+    chat_id = call.message.chat.id
+    saved_date = current_shown_dates.get(chat_id)
+    if saved_date is not None:
+        year, month = saved_date
+        month += 1
+        if month > 12:
+            month = 1
+            year += 1
+        date = (year, month)
+        current_shown_dates[chat_id] = date
+        markup = create_calendar(year, month, isFirst=isFirst)
+        return markup, date
+
+
+def previous_month_markup(current_shown_dates, call, isFirst=False):
+    chat_id = call.message.chat.id
+    saved_date = current_shown_dates.get(chat_id)
+    if saved_date is not None:
+        year, month = saved_date
+        month -= 1
+        if month < 1:
+            month = 12
+            year -= 1
+        date = (year, month)
+        current_shown_dates[chat_id] = date
+        markup = create_calendar(year, month, isFirst=isFirst)
+        return markup, date
