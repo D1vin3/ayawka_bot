@@ -9,7 +9,7 @@ def set_state(user_id, value):
         try:
             db[user_id] = value
             return True
-        except:
+        except KeyError:
             # тут желательно как-то обработать ситуацию
             return False
 
@@ -32,6 +32,8 @@ class SessionDb:
             'first_date': '',
             'last_date': '',
             'type': '',
+            'dr_source': '',
+            'dr_destination': '',
         }
 
         value = json.dumps(value)
@@ -39,10 +41,9 @@ class SessionDb:
             try:
                 db[user_id] = value
                 return True
-            except:
+            except KeyError:
                 # тут желательно как-то обработать ситуацию
                 return False
-
 
     def get_session(self, user_id):
         with Vedis(config.session_file) as db:
@@ -53,8 +54,8 @@ class SessionDb:
             except KeyError:
                 return 'no session for this user'
 
-
-    def update_session(self, user_id, source=None, destination=None, first_date=None, last_date=None, type=None):
+    def update_session(self, user_id, source=None, destination=None, first_date=None, last_date=None, type=None,
+                       dr_source=None, dr_destination=None):
         with Vedis(config.session_file) as db:
             try:
                 print('{} with {}'.format(user_id, db[user_id]))
@@ -70,6 +71,10 @@ class SessionDb:
                     value['last_date'] = last_date
                 elif type is not None:
                     value['type'] = type
+                elif dr_source is not None:
+                    value['dr_source'] = dr_source
+                elif dr_destination is not None:
+                    value['dr_destination'] = dr_destination
                 # elif weight is not None:
                 #     value['weight'] = weight
                 # elif price is not None:
@@ -89,14 +94,14 @@ class DBHelper:
 
     def setup(self):
         stmt = "CREATE TABLE IF NOT EXISTS orders (id integer primary key, " \
-                   "user text, " \
-                   "source text, " \
-                   "destination text, " \
-                   "first_date text, " \
-                   "last_date text," \
-                   "type text)"
-                   # "weight text," \
-                   # "price text)"
+               "user text, " \
+               "source text, " \
+               "destination text, " \
+               "first_date text, " \
+               "last_date text," \
+               "type text)"
+        # "weight text," \
+        # "price text)"
         self.conn.execute(stmt)
         self.conn.commit()
 
@@ -118,7 +123,7 @@ class DBHelper:
 
     def delete_order(self, id):
         stmt = "DELETE FROM orders WHERE id = (?)"
-        args = (id, )
+        args = (id,)
         self.conn.execute(stmt, args)
         self.conn.commit()
 
@@ -140,3 +145,11 @@ class DBHelper:
         self.conn.execute(stmt)
         print('dropped')
         return 'done'
+
+    def search_order(self, source, destination):
+        items = list()
+        stmt = "SELECT * FROM orders WHERE source = (?) AND destination = (?)"
+        args = (source, destination)
+        for row in self.conn.execute(stmt, args):
+            items.append(row)
+        return items
