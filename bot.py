@@ -12,7 +12,7 @@ from config import token
 from dbhelper import DBHelper, SessionDb
 from buttons import source_buttons, main_buttons_without_img, \
     currency_site_buttons, marginality_amount_buttons, travel_types_buttons, reset_buttons, destination_buttons
-from utils import create_inline_keyboard, create_keyboard, formatItems
+from utils import create_inline_keyboard, create_keyboard, formatItems, from_string_to_datetime, from_datetime_to_string
 from telegramcalendar import create_calendar, next_month_markup, previous_month_markup
 
 current_shown_dates = {}
@@ -61,17 +61,23 @@ def cmd_reset(message):
     dbhelper.set_state(message.chat.id, config.States.S_CHOOSE_LOCATION.value)
 
 
-@bot.message_handler(commands=["Мои_заявки"])
+@bot.message_handler(commands=["Мои_объявления"])
 def get_own_orders(message):
     chat_id = message.chat.id
     orders = db.get_own_orders(chat_id)
     if len(orders) is not 0:
         for order in orders:
-            text = "Откуда: {} \nКуда: {} \nНачальная дата: {} \nКонечная дата: {} \nТип перевозки: {}\n\n". \
-                format(order[2], order[3], order[4], order[5], order[6])
+            source, destination, first_date, last_date, travel_type, created_datetime = \
+                order[2], order[3], order[4], order[5], order[6], order[7]
+
+            created_datetime = from_string_to_datetime(created_datetime)
+            created_datetime = from_datetime_to_string(created_datetime, rus_loc=True)
+            text = "Откуда: {} \nКуда: {} \nНачальная дата: {} \nКонечная дата: {} \n" \
+                   "Тип перевозки: {} \nДата создания объявления: {}\n\n". \
+                format(source, destination, first_date, last_date, travel_type, created_datetime)
             bot.send_message(chat_id, text, reply_markup=create_inline_keyboard(order, 'deleteOrder'))
     else:
-        text = "Список ваших заявок пуст. Добавьте первое, нажав на /Отправить_посылку"
+        text = "Список ваших объявлений пуст. Добавьте первое, нажав на /Отправить_посылку"
         bot.send_message(chat_id, text)
 
 
@@ -89,13 +95,16 @@ def get_own_orders(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def test_callback(call):
-    chat_id = call.message.chat.id
-    data = call.data.split('.')
-    print('------{}'.format(data))
-    type = data[0]
-    id = int(''.join(filter(lambda x: x.isdigit(), data[-1])))
-    print('CALLBACK IS CALLED')
-    now = datetime.datetime.now()               #Current date
+    try:
+        chat_id = call.message.chat.id
+        data = call.data.split('.')
+        print('------{}'.format(data))
+        type = data[0]
+        id = int(''.join(filter(lambda x: x.isdigit(), data[-1])))
+        print('CALLBACK IS CALLED')
+        now = datetime.datetime.now()               #Current date
+    except ValueError:
+        pass
 
     if type == 'source':
         source = ''.join(source_buttons[id - 1].split('.')[-1].strip())
@@ -215,11 +224,19 @@ def test_callback(call):
                 else:
                     username = "{} {}".format(user.first_name, user.last_name)
 
-                text = "Автор: {} \nОткуда: {} \nКуда: {} \nНачальная дата: {} \nКонечная дата: {} \nТип перевозки: {}\n\n". \
-                    format(username, order[2], order[3], order[4], order[5], order[6])
+                source, destination, first_date, last_date, travel_type, created_datetime = \
+                    order[2], order[3], order[4], order[5], order[6], order[7]
+
+                created_datetime = from_string_to_datetime(created_datetime)
+                created_datetime = from_datetime_to_string(created_datetime, rus_loc=True)
+
+                text = "Автор: {} \nОткуда: {} \nКуда: {} \nНачальная дата: {} \n" \
+                       "Конечная дата: {} \nТип перевозки: {}\nДата создания объявления: {}\n\n". \
+                    format(username, source, destination, first_date, last_date,
+                           travel_type, created_datetime)
                 bot.send_message(chat_id, text, reply_markup=create_inline_keyboard(order, 'showOrder'))
         else:
-            text = "Список заявок пуст. Добавьте первое, нажав на /Отправить_посылку"
+            text = "Список объявлений пуст. Добавьте первое, нажав на /Отправить_посылку"
             bot.send_message(chat_id, text)
 
     elif type == 'deleteOrder':
@@ -230,38 +247,6 @@ def test_callback(call):
             chat_id, 'Объявление успешно удалено',
             reply_markup=create_keyboard(main_buttons_without_img, 1)
         )
-
-    # elif type == 'next-month':
-    #     print('awesome!!!')
-    #     saved_date = current_shown_dates.get(chat_id)
-    #     if saved_date is not None:
-    #         year, month = saved_date
-    #         month += 1
-    #         if month > 12:
-    #             month = 1
-    #             year += 1
-    #         date = (year, month)
-    #         current_shown_dates[chat_id] = date
-    #         markup = create_calendar(year, month, isFirst=True)
-    #         bot.edit_message_text("Пожалуйста, выберите дату", call.from_user.id, call.message.message_id,
-    #                               reply_markup=markup)
-    #         bot.answer_callback_query(call.id, text="")
-    #
-    # elif type == 'previous-month':
-    #     saved_date = current_shown_dates.get(chat_id)
-    #     if saved_date is not None:
-    #         year, month = saved_date
-    #         month -= 1
-    #         if month < 1:
-    #             month = 12
-    #             year -= 1
-    #         date = (year, month)
-    #         current_shown_dates[chat_id] = date
-    #         markup = create_calendar(year, month)
-    #         bot.edit_message_text("Please, choose a date", call.from_user.id, call.message.message_id,
-    #                               reply_markup=markup)
-    #         bot.answer_callback_query(call.id, text="")
-    # print('--------------------------------------------------------------------')
 
 
 print('Bot has been switched on')

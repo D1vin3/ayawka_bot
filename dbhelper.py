@@ -1,6 +1,7 @@
 import json
 import sqlite3
 import config
+import datetime
 from vedis import Vedis
 
 
@@ -75,10 +76,6 @@ class SessionDb:
                     value['dr_source'] = dr_source
                 elif dr_destination is not None:
                     value['dr_destination'] = dr_destination
-                # elif weight is not None:
-                #     value['weight'] = weight
-                # elif price is not None:
-                #     value['price'] = price
                 value = json.dumps(value)
                 db[user_id] = value
                 return db[user_id]
@@ -99,16 +96,16 @@ class DBHelper:
                "destination text, " \
                "first_date text, " \
                "last_date text," \
-               "type text)"
-        # "weight text," \
-        # "price text)"
+               "type text," \
+               "created_datetime datetime)"
         self.conn.execute(stmt)
         self.conn.commit()
 
     def add_order(self, user, source, destination, first_date, last_date, type):
-        stmt = "INSERT INTO orders (user, source, destination, first_date, last_date, type) VALUES " \
-               "(?, ?, ?, ?, ?, ?)"
-        args = (user, source, destination, first_date, last_date, type)
+        now = datetime.datetime.now()
+        stmt = "INSERT INTO orders (user, source, destination, first_date, last_date, type, " \
+               "created_datetime) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        args = (user, source, destination, first_date, last_date, type, now)
         self.conn.execute(stmt, args)
         self.conn.commit()
 

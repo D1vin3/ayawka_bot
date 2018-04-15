@@ -1,4 +1,20 @@
+import locale
+from datetime import datetime
 from telebot import types
+
+
+def from_string_to_datetime(string_date, fm="%Y-%m-%d %H:%M:%S.%f"):
+    return datetime.strptime(string_date, fm)
+
+
+def from_datetime_to_string(datetime_date, fm="%d %B/ %H:%M", rus_loc=False):
+    if rus_loc:
+        loc = locale.getlocale()
+        locale.setlocale(locale.LC_ALL, ('ru_RU', 'UTF-8'))
+        datetime = datetime_date.strftime(fm)
+        locale.setlocale(locale.LC_ALL, loc)
+        return datetime
+    return datetime_date.strftime(fm)
 
 
 def getItems(text):
@@ -57,7 +73,7 @@ def create_inline_keyboard(orders, type=None):
 def create_inline_button_for_delete(order):
     keyboard = types.InlineKeyboardMarkup()
     callback_data = 'deleteOrder.{}'.format(order[0])
-    btn = types.InlineKeyboardButton(text='Удалить заявку', callback_data=callback_data)
+    btn = types.InlineKeyboardButton(text='Удалить объявление', callback_data=callback_data)
     keyboard.add(btn)
     return keyboard
 

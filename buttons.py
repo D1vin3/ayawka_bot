@@ -15,7 +15,7 @@ reset_buttons = [
 main_buttons_without_img = [
     '/Отправить_посылку',
     '/Могу_доставить',
-    '/Мои_заявки'
+    '/Мои_объявления'
 ]
 
 source_buttons = [
@@ -23,7 +23,7 @@ source_buttons = [
     '2. Астана',
     '3. Шымкент',
     '4. Караганда',
-    '5. Тараз',
+    '5. Актобе',
 ]
 
 destination_buttons = [
@@ -31,7 +31,7 @@ destination_buttons = [
     '2. Астана',
     '3. Шымкент',
     '4. Караганда',
-    '5. Тараз',
+    '5. Актобе',
 ]
 
 from_to_locations_buttons = [
