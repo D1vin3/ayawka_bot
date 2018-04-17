@@ -30,7 +30,6 @@ class SessionDb:
         value = {
             'source': source,
             'destination': '',
-            'first_date': '',
             'last_date': '',
             'type': '',
             'dr_source': '',
@@ -55,7 +54,7 @@ class SessionDb:
             except KeyError:
                 return 'no session for this user'
 
-    def update_session(self, user_id, source=None, destination=None, first_date=None, last_date=None, type=None,
+    def update_session(self, user_id, source=None, destination=None, last_date=None, type=None,
                        dr_source=None, dr_destination=None):
         with Vedis(config.session_file) as db:
             try:
@@ -66,8 +65,6 @@ class SessionDb:
                     value['source'] = source
                 elif destination is not None:
                     value['destination'] = destination
-                elif first_date is not None:
-                    value['first_date'] = first_date
                 elif last_date is not None:
                     value['last_date'] = last_date
                 elif type is not None:
@@ -94,18 +91,17 @@ class DBHelper:
                "user text, " \
                "source text, " \
                "destination text, " \
-               "first_date text, " \
                "last_date text," \
                "type text," \
                "created_datetime datetime)"
         self.conn.execute(stmt)
         self.conn.commit()
 
-    def add_order(self, user, source, destination, first_date, last_date, type):
+    def add_order(self, user, source, destination, last_date, type):
         now = datetime.datetime.now()
-        stmt = "INSERT INTO orders (user, source, destination, first_date, last_date, type, " \
-               "created_datetime) VALUES (?, ?, ?, ?, ?, ?, ?)"
-        args = (user, source, destination, first_date, last_date, type, now)
+        stmt = "INSERT INTO orders (user, source, destination, last_date, type, " \
+               "created_datetime) VALUES (?, ?, ?, ?, ?, ?)"
+        args = (user, source, destination, last_date, type, now)
         self.conn.execute(stmt, args)
         self.conn.commit()
 

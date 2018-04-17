@@ -3,7 +3,8 @@ from enum import Enum
 import emoji
 
 
-token = '596910692:AAGJ-MKjRqScqZbSUjMC1sZCqrGhLQchfX0'
+# token = '596910692:AAGJ-MKjRqScqZbSUjMC1sZCqrGhLQchfX0'
+token = '588750773:AAEqUMpY8vSmVWdF4Iww1ZEGxQIPvFU62J4'
 url = 'https://api.telegram.org/bot{0}/'.format(token)
 
 db_file = "database.vdb"

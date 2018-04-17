@@ -46,24 +46,25 @@ def create_inline_keyboard(orders, type=None):
         if type == 'deleteOrder':
             return create_inline_button_for_delete(orders)
         elif type == 'showOrder':
-            return create_inline_button_for_show(orders)
+            return create_inline_button_for_show()
         for i in range(len(orders)):
-            if type == 'source':
-                item_id = str(int(orders[i].split('.')[0]))
-                callback_data = '{}.{}'.format(type, item_id)
-            elif type == 'destination':
-                item_id = str(int(orders[i].split('.')[0]))
-                callback_data = '{}.{}'.format(type, item_id)
-            elif type == 'type':
-                item_id = str(int(orders[i].split('.')[0]))
-                callback_data = '{}.{}'.format(type, item_id)
-
-            if type == 'dr_source':
-                item_id = str(int(orders[i].split('.')[0]))
-                callback_data = '{}.{}'.format(type, item_id)
-            if type == 'dr_destination':
-                item_id = str(int(orders[i].split('.')[0]))
-                callback_data = '{}.{}'.format(type, item_id)
+            item_id = str(int(orders[i].split('.')[0]))
+            callback_data = '{}.{}'.format(type, item_id)
+            # if type == 'source':
+            #     item_id = str(int(orders[i].split('.')[0]))
+            #     callback_data = '{}.{}'.format(type, item_id)
+            # elif type == 'destination':
+            #     item_id = str(int(orders[i].split('.')[0]))
+            #     callback_data = '{}.{}'.format(type, item_id)
+            # elif type == 'type':
+            #     item_id = str(int(orders[i].split('.')[0]))
+            #     callback_data = '{}.{}'.format(type, item_id)
+            # if type == 'dr_source':
+            #     item_id = str(int(orders[i].split('.')[0]))
+            #     callback_data = '{}.{}'.format(type, item_id)
+            # if type == 'dr_destination':
+            #     item_id = str(int(orders[i].split('.')[0]))
+            #     callback_data = '{}.{}'.format(type, item_id)
 
             btn = types.InlineKeyboardButton(text=orders[i], callback_data=callback_data)
             keyboard.add(btn)
@@ -78,7 +79,7 @@ def create_inline_button_for_delete(order):
     return keyboard
 
 
-def create_inline_button_for_show(order):
+def create_inline_button_for_show():
     keyboard = types.InlineKeyboardMarkup()
     return keyboard
 
