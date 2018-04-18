@@ -27,7 +27,8 @@ db.setup()
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     db.get_orders()
-    bot.send_message(message.chat.id, "Здравствуйте, я бот Аяшки из СДУ.")
+    bot.send_message(message.chat.id, "Здравствуйте! Этот бот поможет вам найти попутчика "
+                                      "для передачи посылки в другой город")
     bot.send_message(
         message.chat.id, "Выберите интересующую вас услугу...",
         reply_markup=create_keyboard(main_buttons_without_img, 1)
@@ -180,6 +181,7 @@ def test_callback(call):
         dr_destination = ''.join(source_buttons[id - 1].split('.')[-1].strip())
         print('dr_destination is {}'.format(dr_destination))
         order = session.get_session(chat_id)
+        print('order from session is {}'.format(order))
         dr_source = order['dr_source']
         orders = db.search_order(source=dr_source, destination=dr_destination)
 
