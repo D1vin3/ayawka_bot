@@ -201,6 +201,7 @@ def test_callback(call):
                     order[2], order[3], order[4], order[5], order[6]
 
                 created_datetime = from_string_to_datetime(created_datetime)
+                created_datetime += datetime.timedelta(hours=6)
                 created_datetime = from_datetime_to_string(created_datetime, rus_loc=True)
 
                 text = "Автор: {} \nОткуда: {} \nКуда: {} \nДата прибытия посылки: {} " \
