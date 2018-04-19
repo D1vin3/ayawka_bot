@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import pytz
+
 import config
 import dbhelper
 import logging
@@ -101,7 +103,8 @@ def test_callback(call):
         type = data[0]
         id = int(''.join(filter(lambda x: x.isdigit(), data[-1])))
         print('CALLBACK IS CALLED')
-        now = datetime.datetime.now()               #Current date
+        now = datetime.datetime.now(tz=pytz.timezone('Asia/Almaty'))    # Current date
+        print(now)
     except ValueError:
         pass
 
