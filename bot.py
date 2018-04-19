@@ -72,6 +72,7 @@ def get_own_orders(message):
                 order[2], order[3], order[4], order[5], order[6]
 
             created_datetime = from_string_to_datetime(created_datetime)
+            created_datetime += datetime.timedelta(hours=6)
             created_datetime = from_datetime_to_string(created_datetime, rus_loc=True)
             text = "Откуда: {} \nКуда: {} \nДата прибытия посылки: {} \n" \
                    "Тип перевозки: {} \nДата создания объявления: {}\n\n". \
