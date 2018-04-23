@@ -29,7 +29,7 @@ db.setup()
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     db.get_orders()
-    bot.send_message(message.chat.id, "Здравствуйте! Этот бот поможет вам найти попутчика "
+    bot.send_message(message.chat.id, "Здравствуйте! Этот бот найдет вам попутчика "
                                       "для передачи посылки в другой город")
     bot.send_message(
         message.chat.id, "Выберите интересующую вас услугу...",
