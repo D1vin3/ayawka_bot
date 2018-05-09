@@ -2,7 +2,6 @@
 import locale
 from datetime import datetime
 from math import ceil
-
 from telebot import types
 
 
@@ -58,32 +57,26 @@ def create_inline_keyboard(orders, type=None):
             is_even = count % 2 == 0
             print(orders)
             for i, v in enumerate(range(0, count, 2)):
-                # print(orders[v])
                 if not is_even:
                     if i < max_i - 1:
-                        print('normal iter')
                         first = orders[v]
                         second = orders[v+1]
-                        print(first, second)
                     else:
-                        print('max')
                         first = orders[v]
                         second = None
-                        print(first, second)
                 else:
                     first = orders[v]
                     second = orders[v+1]
-                    print(first, second)
 
                 btn_callback_data = '{}.{}'.format(type, str(int(first.split('.')[0])))
                 btn = types.InlineKeyboardButton(text=first, callback_data=btn_callback_data)
-
                 if second is not None:
                     btn_2_callback_data = '{}.{}'.format(type, str(int(second.split('.')[0])))
                     btn_2 = types.InlineKeyboardButton(text=second, callback_data=btn_2_callback_data)
                     keyboard.add(btn, btn_2)
                 else:
                     keyboard.add(btn)
+
             return keyboard
 
         for i in range(len(orders)):
