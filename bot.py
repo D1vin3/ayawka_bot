@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import pytz
-
 import config
 import dbhelper
 import logging
 import telebot
 import datetime
-from telebot import TeleBot
+from telebot import TeleBot, types
 from config import token
 from dbhelper import DBHelper, SessionDb
 from buttons import source_buttons, main_buttons_without_img, travel_types_buttons, \
@@ -29,11 +28,26 @@ db.setup()
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     db.get_orders()
+
+    markup = types.InlineKeyboardMarkup(row_width=3)
+    row = list()
+    # row.append(types.InlineKeyboardButton("<", callback_data="{}.previous-month.999".format(type)))
+    # row.append(types.InlineKeyboardButton(" ", callback_data="ignore.999"))
+    # row.append(types.InlineKeyboardButton(">", callback_data="{}.next-month.999".format(type)))
+    r1 = types.InlineKeyboardButton("<", callback_data="{}.previous-month.999".format(type))
+    r2 = types.InlineKeyboardButton(" ", callback_data="ignore.999")
+    r3 = types.InlineKeyboardButton(">", callback_data="{}.next-month.999".format(type))
+
+    # markup.row(*row)
+    markup.add(r1, r2, r3)
+    print(markup.to_json())
+    bot.send_message(message.chat.id, 'smth', reply_markup=markup)
+
     bot.send_message(message.chat.id, "Здравствуйте! Этот бот найдет вам попутчика "
                                       "для передачи посылки в другой город")
     bot.send_message(
         message.chat.id, "Выберите интересующую вас услугу...",
-        reply_markup=create_keyboard(main_buttons_without_img, 1)
+        reply_markup=create_keyboard(main_buttons_without_img, 2)
     )
 
 
@@ -46,8 +60,11 @@ def send_crypto(message):
     )
     bot.send_message(
         message.chat.id, "Откуда: ",
-        reply_markup=create_inline_keyboard(source_buttons, type='source')
-    )
+        reply_markup=create_inline_keyboard(source_buttons, type='source_cities'))
+    # bot.send_message(
+    #     message.chat.id, "Откуда: ",
+    #     reply_markup=create_inline_keyboard(source_buttons, type='source')
+    # )
     dbhelper.get_current_state(message.chat.id)
 
 
@@ -109,16 +126,20 @@ def test_callback(call):
     except ValueError:
         pass
 
-    if type == 'source':
+    # if type == 'source':
+    if type == 'source_cities':
         source = ''.join(source_buttons[id - 1].split('.')[-1].strip())
         print('source is {}'.format(source))
         bot.send_message(
             chat_id, "Куда: ",
-            reply_markup=create_inline_keyboard(destination_buttons, type='destination')
-        )
+            reply_markup=create_inline_keyboard(destination_buttons, type='destination_cities'))
+        # bot.send_message(
+        #     chat_id, "Куда: ",
+        #     reply_markup=create_inline_keyboard(destination_buttons, type='destination'))
         session.create_session_with_source(chat_id, source=source)
 
-    elif type == 'destination':
+    # elif type == 'destination':
+    elif type == 'destination_cities':
         date = (now.year, now.month)
         current_shown_dates[chat_id] = date  # Saving the current date in a dict
         markup = create_calendar(now.year, now.month)

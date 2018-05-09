@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import locale
 from datetime import datetime
+from math import ceil
+
 from telebot import types
 
 
@@ -48,24 +50,45 @@ def create_inline_keyboard(orders, type=None):
             return create_inline_button_for_delete(orders)
         elif type == 'showOrder':
             return create_inline_button_for_show()
+
+        elif type == 'source_cities' or type == 'destination_cities' \
+                or type == 'dr_source' or type == 'dr_destination':
+            count = len(orders)
+            max_i = ceil(count / 2)
+            is_even = count % 2 == 0
+            print(orders)
+            for i, v in enumerate(range(0, count, 2)):
+                # print(orders[v])
+                if not is_even:
+                    if i < max_i - 1:
+                        print('normal iter')
+                        first = orders[v]
+                        second = orders[v+1]
+                        print(first, second)
+                    else:
+                        print('max')
+                        first = orders[v]
+                        second = None
+                        print(first, second)
+                else:
+                    first = orders[v]
+                    second = orders[v+1]
+                    print(first, second)
+
+                btn_callback_data = '{}.{}'.format(type, str(int(first.split('.')[0])))
+                btn = types.InlineKeyboardButton(text=first, callback_data=btn_callback_data)
+
+                if second is not None:
+                    btn_2_callback_data = '{}.{}'.format(type, str(int(second.split('.')[0])))
+                    btn_2 = types.InlineKeyboardButton(text=second, callback_data=btn_2_callback_data)
+                    keyboard.add(btn, btn_2)
+                else:
+                    keyboard.add(btn)
+            return keyboard
+
         for i in range(len(orders)):
             item_id = str(int(orders[i].split('.')[0]))
             callback_data = '{}.{}'.format(type, item_id)
-            # if type == 'source':
-            #     item_id = str(int(orders[i].split('.')[0]))
-            #     callback_data = '{}.{}'.format(type, item_id)
-            # elif type == 'destination':
-            #     item_id = str(int(orders[i].split('.')[0]))
-            #     callback_data = '{}.{}'.format(type, item_id)
-            # elif type == 'type':
-            #     item_id = str(int(orders[i].split('.')[0]))
-            #     callback_data = '{}.{}'.format(type, item_id)
-            # if type == 'dr_source':
-            #     item_id = str(int(orders[i].split('.')[0]))
-            #     callback_data = '{}.{}'.format(type, item_id)
-            # if type == 'dr_destination':
-            #     item_id = str(int(orders[i].split('.')[0]))
-            #     callback_data = '{}.{}'.format(type, item_id)
 
             btn = types.InlineKeyboardButton(text=orders[i], callback_data=callback_data)
             keyboard.add(btn)

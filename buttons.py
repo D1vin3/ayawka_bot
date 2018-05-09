@@ -25,7 +25,18 @@ source_buttons = [
     '3. Шымкент',
     '4. Караганда',
     '5. Актобе',
+    '6. Тараз',
+    '7. Павлодар',
+    '8. Усть-Каменогорск',
+    '9. Семей',
+    '10. Костанай',
+    '11. Уральск',
+    '12. Актау',
+    '13. Атырау',
+    '14. Талдыкорган',
+    '15. Кызылорда'
 ]
+
 
 destination_buttons = [
     '1. Алматы',
@@ -33,38 +44,19 @@ destination_buttons = [
     '3. Шымкент',
     '4. Караганда',
     '5. Актобе',
-]
-
-from_to_locations_buttons = [
-    '1. Алматы-Астана',
-    '2. Астана-Алматы',
+    '6. Тараз',
+    '7. Павлодар',
+    '8. Усть-Каменогорск',
+    '9. Семей',
+    '10. Костанай',
+    '11. Уральск',
+    '12. Актау',
+    '13. Атырау',
+    '14. Талдыкорган',
+    '15. Кызылорда'
 ]
 
 travel_types_buttons = [
     '1. Самолёт',
     '2. Поезд'
 ]
-
-currency_site_buttons = [
-    '1. blockchain.info',
-    '2. bittrex.com',
-    '3. bitfinex.com',
-    '4. poloniex.com',
-    '5. exmo.com',
-    '6. cex.io',
-    '7. yobit.net',
-    '8. Другой',
-]
-
-currency_site_buttons_html = [
-    '<a>blockchain.info</a>',
-    # '<a href="http://bittrex.com">bittrex.com</a>',
-    # '<a href="http://bitfinex.com">bitfinex.com</a>'
-    # '<a href="http://blockchain.info">blockchain.info</a>',
-    # '<a href="http://blockchain.info">blockchain.info</a>',
-    # '<a href="http://blockchain.info">blockchain.info</a>',
-    # '<a href="http://blockchain.info">blockchain.info</a>',
-    # '<a href="http://blockchain.info">blockchain.info</a>',
-]
-
-marginality_amount_buttons = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'более 10']
